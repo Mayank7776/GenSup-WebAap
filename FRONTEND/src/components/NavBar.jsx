@@ -4,7 +4,7 @@ import { FiShoppingCart } from "react-icons/fi";
 import { GoPerson } from "react-icons/go";
 import { BsStars } from "react-icons/bs";
 import { HiBars3BottomRight } from "react-icons/hi2";
-import gensupLogo from "../Assets/images/gensupLogo.png";
+import gensupLogo from "../Assets/images/GenSupLogo.png";
 import TopBar from "./TopBar";
 
 const NavBar = () => {
