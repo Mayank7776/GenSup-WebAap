@@ -1,6 +1,6 @@
 import { BsFacebook, BsInstagram, BsTwitterX } from "react-icons/bs";
 import { MdEmail, MdLocationOn, MdPhone } from "react-icons/md";
-import genSupLogo from "../Assets/images/gensupLogo.png";
+import genSupLogo from "../Assets/images/GenSupLogo.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
