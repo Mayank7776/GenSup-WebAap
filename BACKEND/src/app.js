@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || "*", // restrict in production
+  origin: process.env.CORS_ORIGIN,
   credentials: true,
 }));
 app.use(cookieParser());

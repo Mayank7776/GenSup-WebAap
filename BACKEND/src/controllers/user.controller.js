@@ -26,7 +26,9 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const options = {
   httpOnly: true,
-  secure: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/",
 };
 
 // Register
@@ -76,7 +78,7 @@ const userRegister = asyncHandler(async (req, res) => {
 // Login
 const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  
+
   const user = await User.findOne({ email });
   if (!user) {
     throw new apiError(404, "user not found");
@@ -167,4 +169,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { userRegister, userLogin, userLogout, refreshAccessToken };
+const userProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password -refreshToken");
+  if (!user) {
+    throw new apiError(404, "User not found");
+  }
+  res.status(200).json(new apiResponse(200, "User profile fetched", user));
+});
+
+export { userRegister, userLogin, userLogout, refreshAccessToken, userProfile };

@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { HomeContext } from '../contextApi/HomeContext';
 import BreadCrums from '../components/BreadCrums';
+import ProductDisplay from '../components/ProductDisplay';
+import DescriptionBox from '../components/DescriptionBox';
 
 const Products = () => {
   const { allProduct } = useContext(HomeContext);
@@ -19,7 +21,8 @@ const Products = () => {
   return (
     <div>
       <BreadCrums product={product} />
-      {/* You can add product detail UI here */}
+      <ProductDisplay product={product} />  
+      <DescriptionBox />    
     </div>
   );
 };

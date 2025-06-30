@@ -5,7 +5,7 @@ const Item = ({ id, image, name, original_price, new_price }) => {
   return (
     <div className=" w-[350px] p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
       <Link to={`/product/${id}`}>
-
+      
       <img
         src={image}
         alt={name}

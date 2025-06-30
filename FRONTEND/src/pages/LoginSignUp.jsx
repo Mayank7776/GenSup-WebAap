@@ -1,24 +1,57 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LoginSignUp = () => {
+  const navigate = useNavigate();
+
   const [isSignup, setIsSignup] = useState(false);
   const [formData, setFormData] = useState({
-    fullname: '',
+    fullName: '',
     email: '',
     password: '',
-    profilepic: null,
+    profilepic: null, // lowercase
   });
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData({ ...formData, [name]: name === 'profilepic' ? files[0] : value });
+    setFormData({ ...formData, [name]: files ? files[0] : value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add API call logic here
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("password", formData.password);
+
+    if (isSignup) {
+      formDataToSend.append("fullName", formData.fullName);
+      if (formData.profilepic) {
+        formDataToSend.append("profilePic", formData.profilepic); // ✅ matches multer field name
+      }
+    }
+
+    try {
+      const endpoint = isSignup
+        ? "http://localhost:3000/api/userAuth/Register"
+        : "http://localhost:3000/api/userAuth/Login";
+
+      const response = await axios.post(endpoint, formDataToSend, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Success:", response.data);
+      navigate("/");
+
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Something went wrong!");
+    }
   };
 
   return (
@@ -37,7 +70,7 @@ const LoginSignUp = () => {
           <AnimatePresence>
             {isSignup && (
               <motion.div
-                key="fullname"
+                key="fullName"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -46,8 +79,8 @@ const LoginSignUp = () => {
                 <label className="block text-sm font-medium text-gray-700">Full Name</label>
                 <input
                   type="text"
-                  name="fullname"
-                  value={formData.fullname}
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
                   className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black transition-all duration-300"
                   required

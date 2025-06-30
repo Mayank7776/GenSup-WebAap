@@ -1,16 +1,37 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiShoppingCart } from "react-icons/fi";
-import { GoPerson } from "react-icons/go";
 import { BsStars } from "react-icons/bs";
 import { HiBars3BottomRight } from "react-icons/hi2";
+import axios from "axios";
+import { GoPersonFill } from "react-icons/go";
+
 import gensupLogo from "../Assets/images/GenSupLogo.png";
 import TopBar from "./TopBar";
 
 const NavBar = () => {
   const location = useLocation();
-  const currentPath = location.pathname.slice(1); // remove leading "/"
+  const navigate = useNavigate();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const currentPath = location.pathname.slice(1);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        await axios.get("http://localhost:3000/api/userAuth/Profile", {
+          withCredentials: true,
+        });
+        setIsLoggedIn(true);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+    checkLoginStatus();
+  }, [location.pathname]);
 
   const menuItems = [
     { name: "Shop", key: "" },
@@ -26,6 +47,23 @@ const NavBar = () => {
 
   const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await axios.post(
+        "http://localhost:3000/api/userAuth/Logout",
+        {},
+        { withCredentials: true }
+      );
+      setIsLoggedIn(false);
+      navigate("/Login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <>
       <TopBar />
@@ -34,7 +72,11 @@ const NavBar = () => {
         {/* Logo */}
         <div className="h-16 w-auto">
           <Link to="/">
-          <img src={gensupLogo} alt="gensup-logo" className="h-16 pl-1 pt-1" />
+            <img
+              src={gensupLogo}
+              alt="gensup-logo"
+              className="h-16 pl-1 pt-1"
+            />
           </Link>
         </div>
 
@@ -66,28 +108,36 @@ const NavBar = () => {
           })}
         </ul>
 
-        {/* Icons */}
+        {/* Icons - Always visible */}
         <div className="flex items-center gap-4">
           <Link to="/cart">
-            <FiShoppingCart
-              className="h-6 w-6 text-white"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          </Link>
-          <Link to="/login">
-            <GoPerson
-              className="h-8 w-8 text-white"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
+            <FiShoppingCart className="h-6 w-6 text-white" />
           </Link>
 
-          {/* Mobile Hamburger */}
+          {/* Desktop Login/Logout */}
+          <div className="hidden md:block">
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="text-white border border-white px-4 py-1 rounded hover:bg-white hover:text-black transition"
+              >
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </button>
+            ) : (
+              <Link to="/login">
+                <GoPersonFill className="text-white h-10 w-7 hover:w-8" />
+              </Link>
+            )}
+          </div>
+
+          {/* Hamburger */}
           <button className="md:hidden" onClick={toggleMobileMenu}>
             <HiBars3BottomRight className="h-6 w-6 text-white" />
           </button>
         </div>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="absolute top-20 left-0 w-full bg-black text-white flex flex-col gap-4 py-4 px-6 z-50 md:hidden">
             {menuItems.map((item) => (
@@ -102,6 +152,30 @@ const NavBar = () => {
                 </span>
               </Link>
             ))}
+
+            {/* Mobile Login/Logout */}
+            <div>
+              {isLoggedIn ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  disabled={isLoggingOut}
+                  className="text-left text-white hover:text-amber-400"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white hover:text-amber-400"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>
